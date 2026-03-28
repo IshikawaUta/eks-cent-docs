@@ -25,8 +25,8 @@ class EksCent::Router
     context.instance_variable_set("@title", title)
     context.instance_variable_set("@path", req.path)
     
-    # Deteksi base URL secara dinamis
-    protocol = req.env['HTTPS'] == 'on' ? 'https' : 'http'
+    # Deteksi base URL secara dinamis (mendukung HTTPS di balik proxy)
+    protocol = req.env['HTTP_X_FORWARDED_PROTO'] || (req.env['HTTPS'] == 'on' ? 'https' : 'http')
     base_url = "#{protocol}://#{req.env['HTTP_HOST']}"
     context.instance_variable_set("@base_url", base_url)
     
@@ -59,14 +59,14 @@ router = EksCent::Router.new do
   # Sitemap Dinamis
   get '/sitemap.xml' do |req, res|
     puts "[DEBUG] Memproses rute /sitemap.xml..."
-    protocol = req.env['HTTPS'] == 'on' ? 'https' : 'http'
+    protocol = req.env['HTTP_X_FORWARDED_PROTO'] || (req.env['HTTPS'] == 'on' ? 'https' : 'http')
     host = req.env['HTTP_HOST']
     res.headers['Content-Type'] = 'text/xml; charset=utf-8'
     res.headers['Content-Disposition'] = 'inline'
     res.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     
     # Deteksi base URL
-    protocol = req.env['HTTPS'] == 'on' ? 'https' : 'http'
+    protocol = req.env['HTTP_X_FORWARDED_PROTO'] || (req.env['HTTPS'] == 'on' ? 'https' : 'http')
     host = req.env['HTTP_HOST']
     @base_url = "#{protocol}://#{host}"
     
@@ -79,7 +79,7 @@ router = EksCent::Router.new do
     res.headers['Content-Disposition'] = 'inline'
     
     # Deteksi base URL
-    protocol = req.env['HTTPS'] == 'on' ? 'https' : 'http'
+    protocol = req.env['HTTP_X_FORWARDED_PROTO'] || (req.env['HTTPS'] == 'on' ? 'https' : 'http')
     host = req.env['HTTP_HOST']
     base_url = "#{protocol}://#{host}"
     
@@ -88,7 +88,7 @@ router = EksCent::Router.new do
 
   # Robots.txt Dinamis
   get '/robots.txt' do |req, res|
-    protocol = req.env['HTTPS'] == 'on' ? 'https' : 'http'
+    protocol = req.env['HTTP_X_FORWARDED_PROTO'] || (req.env['HTTPS'] == 'on' ? 'https' : 'http')
     host = req.env['HTTP_HOST']
     
     res.headers['Content-Type'] = 'text/plain; charset=utf-8'
